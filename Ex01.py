@@ -5,11 +5,11 @@ from datetime import datetime, timedelta
 class Field:
     """ Базовий клас для полів контактів."""
 
-    def __init__(self, value: str):
+    def __init__(self, value):
         self.value = value
 
     def __str__(self):
-        return self.value
+        return str(self.value)
 
 
 class Name(Field):
@@ -62,7 +62,7 @@ class Record:
                 return True
         return False
 
-    def find_phone(self, phone: str) -> str:
+    def find_phone(self, phone: str) -> str | None:
         for p in self.phones:
             if p.value == phone:
                 return p.value
@@ -86,12 +86,14 @@ class AddressBook(UserDict):
     def add_record(self, record: Record) -> None:
         self.data[record.name.value] = record
 
-    def find(self, name: str) -> Record:
+    def find(self, name: str) -> Record | None:
         return self.data.get(name)
 
     def delete(self, name: str) -> bool:
         if name in self.data:
             del self.data[name]
+            return True
+        return False
 
     def get_upcoming_birthdays(self) -> list:
         today = datetime.today().date()
@@ -148,17 +150,16 @@ def add_contact(args, book):
 
 @input_error
 def change_contact(args, book):
-    """ Функція для зміни номера телефону існуючого контакту."""
-    name, old_phone, new_phone = args
+    """ Зміна першого номера телефону контакту на новий."""
+    name, new_phone = args
     record = book.find(name)
 
-    if record is None:
+    if record is None or not record.phones:
         raise KeyError
 
-    if not record.edit_phone(old_phone, new_phone):
-        raise ValueError
-
-    return "Phone updated."
+    old_phone = record.phones[0].value
+    record.edit_phone(old_phone, new_phone)
+    return f"{name}'s phone number {old_phone} was updated to {new_phone}."
 
 
 @input_error
@@ -269,6 +270,15 @@ def main():
 
         elif command == "birthdays":
             print(birthdays(book))
+
+        elif command == "delete":
+            name = args[0] if args else None
+            if not name:
+                print("Enter a name to delete.")
+            elif book.delete(name):
+                print(f"Contact {name} deleted.")
+            else:
+                print(f"Contact {name} not found.")
 
         else:
             print("Invalid command.")
