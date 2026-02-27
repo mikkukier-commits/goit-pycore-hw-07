@@ -89,12 +89,6 @@ class AddressBook(UserDict):
     def find(self, name: str) -> Record | None:
         return self.data.get(name)
 
-    def delete(self, name: str) -> bool:
-        if name in self.data:
-            del self.data[name]
-            return True
-        return False
-
     def get_upcoming_birthdays(self) -> list:
         today = datetime.today().date()
         upcoming = []
@@ -270,15 +264,6 @@ def main():
 
         elif command == "birthdays":
             print(birthdays(book))
-
-        elif command == "delete":
-            name = args[0] if args else None
-            if not name:
-                print("Enter a name to delete.")
-            elif book.delete(name):
-                print(f"Contact {name} deleted.")
-            else:
-                print(f"Contact {name} not found.")
 
         else:
             print("Invalid command.")
