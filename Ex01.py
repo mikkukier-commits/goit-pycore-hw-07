@@ -4,25 +4,31 @@ from datetime import datetime, timedelta
 
 class Field:
     """ Базовий клас для полів контактів."""
+
     def __init__(self, value: str):
         self.value = value
 
     def __str__(self):
         return self.value
-    
+
+
 class Name(Field):
     """Клас для зберігання імені контакту."""
     pass
 
+
 class Phone(Field):
     """ Клас для номера телефону телефону з валідацією."""
-    def __init__(self, value:str):
+
+    def __init__(self, value: str):
         if not (value.isdigit() and len(value) == 10):
             raise ValueError("Номер телефону повинен містити 10 цифр.")
         super().__init__(value)
 
+
 class Birthday(Field):
     """Клас для зберігання дати народження з валідацією."""
+
     def __init__(self, value: str):
         try:
             date_value = datetime.strptime(value, "%d.%m.%Y")
@@ -30,7 +36,7 @@ class Birthday(Field):
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
         super().__init__(date_value)
 
-    
+
 class Record:
     """Клас для зберігання запису контакту, який містить ім'я та список телефонів."""
 
@@ -61,27 +67,29 @@ class Record:
             if p.value == phone:
                 return p.value
         return None
-    
+
     def add_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
 
     def __str__(self) -> str:
         birthday = (
-            self.birthday.value.strftime("%d.%m.%Y") 
-            if self.birthday 
+            self.birthday.value.strftime("%d.%m.%Y")
+            if self.birthday
             else "Not set"
-            )
+        )
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {birthday}"
+
 
 class AddressBook(UserDict):
     """ Клас адресної книги"""
+
     def add_record(self, record: Record) -> None:
         self.data[record.name.value] = record
 
-    def find(self, name:str) -> Record:
+    def find(self, name: str) -> Record:
         return self.data.get(name)
-    
-    def delete(self, name:str) -> bool:
+
+    def delete(self, name: str) -> bool:
         if name in self.data:
             del self.data[name]
 
@@ -95,13 +103,14 @@ class AddressBook(UserDict):
                 birthday_this_year = birthday.replace(year=today.year)
 
                 if birthday_this_year < today:
-                    birthday_this_year = birthday_this_year.replace(year=today.year + 1)
+                    birthday_this_year = birthday_this_year.replace(
+                        year=today.year + 1)
 
                 if 0 <= (birthday_this_year - today).days <= 7:
                     upcoming.append(record.name.value)
 
         return upcoming
-    
+
 
 def input_error(func):
     """ Декоратор для обробки помилок введення користувача."""
@@ -207,15 +216,16 @@ def birthdays(book):
     for name in upcoming:
         try:
             record = book.find(name)
-            bd = record.birthday.value  
-            bd_date = bd.date()         
+            bd = record.birthday.value
+            bd_date = bd.date()
 
             next_bd = bd_date.replace(year=today.year)
             if next_bd < today:
                 next_bd = bd_date.replace(year=today.year + 1)
 
             days_left = (next_bd - today).days
-            lines.append(f"{name} — {bd_date.strftime('%d.%m.%Y')} ({days_left} days left)")
+            lines.append(
+                f"{name} — {bd_date.strftime('%d.%m.%Y')} ({days_left} days left)")
 
         except KeyError:
             lines.append(f"{name} — Birthday not set")
