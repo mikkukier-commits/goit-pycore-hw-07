@@ -107,7 +107,6 @@ class AddressBook(UserDict):
 
         return upcoming
 
-
 def input_error(func):
     """ Декоратор для обробки помилок введення користувача."""
     def inner(*args):
